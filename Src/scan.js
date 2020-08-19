@@ -12,6 +12,7 @@ function getDeviceInfo() {
           acceptAllDevices: true , // Option to accept all devices
           optionalServices: ['device_information']
         } */
+        let decoder = new TextDecoder('utf-8');
         console.log('Requesting Bluetooth Device...')
         navigator.bluetooth.requestDevice({
              acceptAllDevices: true ,
@@ -34,12 +35,19 @@ function getDeviceInfo() {
         .then(services => {
           console.log('Getting Characteristics...');
           let queue = Promise.resolve();
+          let queue1 = Promise.resolve();
           services.forEach(service => {
             queue = queue.then(_ => service.getCharacteristics().then(characteristics => {
               console.log('> Service: ' + service.uuid);
               characteristics.forEach(characteristic => {
                 console.log('>> Characteristic: ' + characteristic.uuid + ' ' +
                     getSupportedProperties(characteristic));
+                    if(service.uuid == "0000180a-0000-1000-8000-00805f9b34fb"){
+                      queue1 = queue1.then(_ => characteristic.readValue()).then(value => {
+                        console.log('> service uuid: '+  service.uuid + ' Read Value: ' + decoder.decode(value));
+                      });
+                    }
+
               });
             }));
           });
